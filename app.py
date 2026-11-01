@@ -56,7 +56,7 @@ class API(BaseHTTPRequestHandler):
             if self.headers.get("X-Role") != "admin":
                 self.reply(403, {"error": "Admin role required"})
                 return
-        
+
         if list_users:
             self.reply(200, {"users": list(USERS.values())})
         elif USERS.pop(42, None) is None:
