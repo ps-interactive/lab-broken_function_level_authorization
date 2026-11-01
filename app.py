@@ -1,6 +1,5 @@
 """Offline BFLA teaching server. Run only in the supplied sandbox."""
 
-import argparse
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlsplit
@@ -51,18 +50,13 @@ class API(BaseHTTPRequestHandler):
             self.reply(404, {"error": "Route not found"})
             return
 
-        if self.server.secure:
-            # Authorize both admin functions using the server-held role.
-            if user["role"] != "admin":
-                self.reply(403, {"error": "Admin role required"})
-                return
-        elif delete_user:
-            # VULNERABLE: The caller can forge this role header.
+        # VULNERABLE: The delete route relies on a forgeable header,
+        # and listing users has no role check at all!
+        if delete_user:
             if self.headers.get("X-Role") != "admin":
                 self.reply(403, {"error": "Admin role required"})
                 return
         
-        # VULNERABLE: Listing users has no role check in the default mode.
         if list_users:
             self.reply(200, {"users": list(USERS.values())})
         elif USERS.pop(42, None) is None:
@@ -75,13 +69,8 @@ class API(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--secure", action="store_true")
-    args = parser.parse_args()
-    # Loopback only; restarting restores all fictional users.
     server = HTTPServer(("127.0.0.1", 5000), API)
-    server.secure = args.secure
-    print(f"{'Secure' if args.secure else 'Vulnerable'} API: http://127.0.0.1:5000", flush=True)
+    print("Vulnerable API server running at: http://127.0.0.1:5000", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
