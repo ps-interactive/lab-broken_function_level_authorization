@@ -50,13 +50,13 @@ class API(BaseHTTPRequestHandler):
             self.reply(404, {"error": "Route not found"})
             return
 
-        # VULNERABLE: The delete route relies on a forgeable header,
-        # and listing users has no role check at all!
+        # VULNERABLE: The caller can forge this role header
         if delete_user:
             if self.headers.get("X-Role") != "admin":
                 self.reply(403, {"error": "Admin role required"})
                 return
 
+        # VULNERABLE: Listing users has no role check in the default mode
         if list_users:
             self.reply(200, {"users": list(USERS.values())})
         elif USERS.pop(42, None) is None:
