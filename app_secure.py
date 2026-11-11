@@ -1,4 +1,4 @@
-"""Offline BFLA teaching server - Remediated version."""
+"""Offline BFLA teaching server. Run only in the supplied sandbox."""
 
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
